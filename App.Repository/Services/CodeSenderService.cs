@@ -1,0 +1,55 @@
+﻿using App.Shared.Models;
+using App.Utils.Serializable;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using System.Net.Http.Headers;
+using System.Net.Http;
+using System.Text;
+using System;
+using System.Threading.Tasks;
+using App.Utils;
+
+namespace App.Repository.Services
+{
+    public interface ICodeSenderService
+    {
+        Task<AnswerBasic> SendCodeAsync(string token, string code);
+    }
+
+    public sealed class CodeSenderService : ICodeSenderService
+    {
+        private readonly ILogger<CodeSenderService> logger;
+        private readonly string baseUrl;
+
+        public CodeSenderService(ILogger<CodeSenderService> logger, IConfiguration conf)
+        {
+            this.logger = logger;
+            this.baseUrl = conf["Server:Url"];
+        }
+
+        public async Task<AnswerBasic> SendCodeAsync(string token, string code)
+        {
+            try
+            {
+                using var client = new HttpClient();
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                var content = new StringContent(new CodeModel(code).ToJson(), Encoding.UTF8, "application/json");
+                using var req = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/api/MarkingCode/SetStatusByMobile")
+                {
+                    Content = content
+                };
+
+                using var res = await client.SendAsync(req);
+               var json = await res.Content.ReadAsStringAsync();
+
+                return json.FromJson<AnswerBasic>();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError($"MarkingCodeService.SendCodeAsync error: {ex.GetAllMessages()}, stack: {ex.GetStackTrace(5)}");
+                return new AnswerBasic { code = 0, message = ex.Message };
+            }
+        }
+    }
+}
