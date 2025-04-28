@@ -9,20 +9,16 @@ namespace App.GS1Scanner.Utils
     {
         public static IConfiguration LoadConfiguration()
         {
-            var builder = new ConfigurationBuilder();
-
             var basePath = FileSystem.AppDataDirectory;
+            var localConfigPath = Path.Combine(basePath, "appsettings.json");
 
-            var appSettingsPath = Path.Combine(basePath, "appsettings.json");
-
-            CopyAsset("appsettings.json", appSettingsPath);
-
-            builder.AddJsonFile(appSettingsPath, optional: false, reloadOnChange: false);
-
-            return builder.Build();
+            CopyFromPackage("appsettings.json", localConfigPath);
+            return new ConfigurationBuilder()
+                   .AddJsonFile(localConfigPath, optional: false, reloadOnChange: true)
+                   .Build();
         }
 
-        private static void CopyAsset(string assetName, string outputPath)
+        private static void CopyFromPackage(string assetName, string outputPath)
         {
             using var stream = FileSystem.OpenAppPackageFileAsync(assetName).Result;
             using var reader = new StreamReader(stream);
