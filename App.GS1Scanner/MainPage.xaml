@@ -1,16 +1,75 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="App.GS1Scanner.MainPage">
+             x:Class="App.GS1Scanner.MainPage"
+             Padding="20">
 
-    <VerticalStackLayout Padding="20" Spacing="10">
-        <Entry x:Name="loginEntry" Placeholder="Login" />
-        <Entry x:Name="passwordEntry" Placeholder="Password" IsPassword="True" />
-        <Button x:Name="loginButton" Text="Войти" Clicked="OnLoginClicked" />
+    <VerticalStackLayout Spacing="12">
+        <Entry  x:Name="loginEntry"      Placeholder="Логин" />
+        <Entry  x:Name="passwordEntry"   Placeholder="Пароль" IsPassword="True" />
+        <Button x:Name="loginButton"     Text="Войти"         Clicked="OnLoginClicked" />
 
-        <Button x:Name="scanButton" Text="Сканировать код" Clicked="OnScanClicked" />
-        <Button x:Name="logoutButton" Text="Выход" Clicked="OnLogoutClicked" />
+        <Label Text="Сканирование" FontAttributes="Bold" Margin="0,15,0,0"/>
 
-        <Label x:Name="resultLabel" TextColor="DarkGreen" />
+        <Button x:Name="successScanButton"
+                Text="Сканировать успешно"
+                Clicked="OnScanSuccessClicked"
+                BackgroundColor="DarkGreen"
+                IsEnabled="False" />
+
+        <Button x:Name="rejectScanButton"
+                Text="Сканировать в брак"
+                Clicked="OnScanRejectClicked"
+                BackgroundColor="DarkRed"
+                IsEnabled="False" />
+
+        <Button x:Name="logoutButton"
+                Text="Выход"
+                IsVisible="False"
+                Clicked="OnLogoutClicked" />
+
+        <Grid ColumnSpacing="6" Padding="0,20,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Label x:Name="codeLabel"
+           TextColor="DodgerBlue"
+           LineBreakMode="CharacterWrap"
+           Grid.Column="0" />
+
+            <ImageButton x:Name="copyCodeButton"
+                 Source="copy.png"
+                 WidthRequest="22"
+                 HeightRequest="22"
+                 BackgroundColor="Transparent"
+                 Padding="0"
+                 IsVisible="False"
+                 Clicked="OnCopyCodeClicked"
+                 Grid.Column="1" />
+        </Grid>
+
+        <Grid ColumnSpacing="6">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Label x:Name="resultLabel"
+           TextColor="DarkGreen"
+           LineBreakMode="WordWrap"
+           Grid.Column="0" />
+
+            <ImageButton x:Name="copyResultButton"
+                 Source="copy.png"
+                 WidthRequest="22"
+                 HeightRequest="22"
+                 BackgroundColor="Transparent"
+                 Padding="0"
+                 IsVisible="False"
+                 Clicked="OnCopyResultClicked"
+                 Grid.Column="1" />
+        </Grid>
     </VerticalStackLayout>
 </ContentPage>

@@ -13,7 +13,7 @@ namespace App.Repository.Services
 {
     public interface ICodeSenderService
     {
-        Task<AnswerBasic> SendCodeAsync(string token, string code);
+        Task<AnswerBasic> SendCodeAsync(string token, CodeModel model);
     }
 
     public sealed class CodeSenderService : ICodeSenderService
@@ -27,21 +27,22 @@ namespace App.Repository.Services
             this.baseUrl = conf["Server:Url"];
         }
 
-        public async Task<AnswerBasic> SendCodeAsync(string token, string code)
+        public async Task<AnswerBasic> SendCodeAsync(string token, CodeModel model)
         {
             try
             {
                 using var client = new HttpClient();
+                client.Timeout = TimeSpan.FromSeconds(500);
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-                var content = new StringContent(new CodeModel(code).ToJson(), Encoding.UTF8, "application/json");
+                var content = new StringContent(model.ToJson(), Encoding.UTF8, "application/json");
                 using var req = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/api/MarkingCode/SetStatusByMobile")
                 {
                     Content = content
                 };
 
                 using var res = await client.SendAsync(req);
-               var json = await res.Content.ReadAsStringAsync();
+                var json = await res.Content.ReadAsStringAsync();
 
                 return json.FromJson<AnswerBasic>();
             }

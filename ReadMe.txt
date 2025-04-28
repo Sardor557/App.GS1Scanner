@@ -1,0 +1,1 @@
+dotnet publish App.GS1Scanner.csproj -f net8.0-android -c Release -p:AndroidPackageFormat=apk -o "D:\publishes\Android\aslScanner"
