@@ -23,7 +23,7 @@
     <ApplicationTitle>GS1Scanner</ApplicationTitle>
 
     <!-- App Identifier -->
-    <ApplicationId>com.companyname.app.gs1scanner</ApplicationId>
+    <ApplicationId>com.scanner.app.gs1scanner</ApplicationId>
 
     <!-- Versions -->
     <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
