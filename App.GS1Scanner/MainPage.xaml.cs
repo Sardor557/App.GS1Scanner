@@ -116,71 +116,79 @@ namespace App.GS1Scanner
         // вызывается из OnScanSuccessClicked(status:3) & OnScanRejectClicked(status:7)
         private async Task StartScanAsync(int status)
         {
-            var permission = await Permissions.RequestAsync<Permissions.Camera>();
-            if (permission != PermissionStatus.Granted)
+            try
             {
-                await DisplayAlert("Нет доступа", "Для сканирования нужна камера.", "OK");
-                return;
-            }
-
-            successScanButton.IsEnabled = rejectScanButton.IsEnabled = false;
-
-            codeLabel.Text = string.Empty;
-            resultLabel.Text = string.Empty;
-            copyCodeButton.IsVisible = false;
-            copyResultButton.IsVisible = false;
-
-            var scanner = new MlKitScanner();            
-            bool scanned = false;
-
-            var modalPage = new ContentPage { Content = scanner };
-
-            modalPage.Disappearing += (obj, ev) =>
-            {
-                if (!scanned)
-                    successScanButton.IsEnabled = rejectScanButton.IsEnabled = true;
-            };
-
-            EventHandler<string> handler = null;
-            handler = async (_, code) =>
-            {
-                if (scanned) return;
-                scanned = true;
-                scanner.CodeDetected -= handler;
-
-                try { Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(100)); }
-                catch { }
-
-                var rawCode = code;
-                var clean = rawCode.TrimLeadingGs();
-
-                codeLabel.Text = code;
-                copyCodeButton.IsVisible = true;
-
-                if (Navigation.ModalStack.Count > 0)
-                    await Navigation.PopModalAsync();
-
-                var waitPage = new WaitPage("Отправка кода…");
-                await Navigation.PushModalAsync(waitPage);
-
-                var message = "Сессия истекла. Авторизуйтесь.";
-                if (token != null)
+                var permission = await Permissions.RequestAsync<Permissions.Camera>();
+                if (permission != PermissionStatus.Granted)
                 {
-                    var model = new CodeModel(clean, status);
-                    var answer = await codeSenderService.SendCodeAsync(token, model);
-                    message = answer.message ?? "Нет ответа";
+                    await DisplayAlert("Нет доступа", "Для сканирования нужна камера.", "OK");
+                    return;
                 }
 
-                await Navigation.PopModalAsync();
+                successScanButton.IsEnabled = rejectScanButton.IsEnabled = false;
 
-                resultLabel.Text = message;
-                copyResultButton.IsVisible = true;
+                codeLabel.Text = string.Empty;
+                resultLabel.Text = string.Empty;
+                copyCodeButton.IsVisible = false;
+                copyResultButton.IsVisible = false;
 
+                var scanner = new MlKitScanner();
+                bool scanned = false;
+
+                var modalPage = new ContentPage { Content = scanner };
+
+                modalPage.Disappearing += (obj, ev) =>
+                {
+                    if (!scanned)
+                        successScanButton.IsEnabled = rejectScanButton.IsEnabled = true;
+                };
+
+                EventHandler<string> handler = null;
+                handler = async (_, code) =>
+                {
+                    if (scanned) return;
+                    scanned = true;
+                    scanner.CodeDetected -= handler;
+
+                    try { Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(100)); }
+                    catch { }
+
+                    var rawCode = code;
+                    var clean = rawCode.TrimLeadingGs();
+
+                    codeLabel.Text = code;
+                    copyCodeButton.IsVisible = true;
+
+                    if (Navigation.ModalStack.Count > 0)
+                        await Navigation.PopModalAsync();
+
+                    var waitPage = new WaitPage("Отправка кода…");
+                    await Navigation.PushModalAsync(waitPage);
+
+                    var message = "Сессия истекла. Авторизуйтесь.";
+                    if (token != null)
+                    {
+                        var model = new CodeModel(clean, status);
+                        var answer = await codeSenderService.SendCodeAsync(token, model);
+                        message = answer.message ?? "Нет ответа";
+                    }
+
+                    await Navigation.PopModalAsync();
+
+                    resultLabel.Text = message;
+                    copyResultButton.IsVisible = true;
+
+                    successScanButton.IsEnabled = rejectScanButton.IsEnabled = true;
+                };
+
+                scanner.CodeDetected += handler;
+                await Navigation.PushModalAsync(modalPage);
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Ошибка", ex.Message, "OK");
                 successScanButton.IsEnabled = rejectScanButton.IsEnabled = true;
-            };
-
-            scanner.CodeDetected += handler;
-            await Navigation.PushModalAsync(modalPage);
+            }
         }
 
         private void ResetUi()

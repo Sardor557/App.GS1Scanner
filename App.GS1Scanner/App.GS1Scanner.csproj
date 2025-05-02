@@ -1,8 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-    <RunAOTCompilation>true</RunAOTCompilation>
-    <EnableLLVM>true</EnableLLVM>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -62,6 +60,12 @@
     <MauiAsset Include="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </MauiAsset>
+  </ItemGroup>
+
+  <ItemGroup>
+    <AndroidLinkSkip Include="App.Utils" />
+    <AndroidLinkSkip Include="App.Repository" />
+    <AndroidLinkSkip Include="App.Shared" />
   </ItemGroup>
 
   <ItemGroup>
