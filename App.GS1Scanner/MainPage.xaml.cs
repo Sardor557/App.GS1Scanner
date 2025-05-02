@@ -130,7 +130,7 @@ namespace App.GS1Scanner
             copyCodeButton.IsVisible = false;
             copyResultButton.IsVisible = false;
 
-            var scanner = new MlKitScanner();
+            var scanner = new MlKitScanner();            
             bool scanned = false;
 
             var modalPage = new ContentPage { Content = scanner };
@@ -141,7 +141,7 @@ namespace App.GS1Scanner
                     successScanButton.IsEnabled = rejectScanButton.IsEnabled = true;
             };
 
-            EventHandler<string>? handler = null;
+            EventHandler<string> handler = null;
             handler = async (_, code) =>
             {
                 if (scanned) return;
@@ -150,6 +150,9 @@ namespace App.GS1Scanner
 
                 try { Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(100)); }
                 catch { }
+
+                var rawCode = code;
+                var clean = rawCode.TrimLeadingGs();
 
                 codeLabel.Text = code;
                 copyCodeButton.IsVisible = true;
@@ -163,7 +166,7 @@ namespace App.GS1Scanner
                 var message = "Сессия истекла. Авторизуйтесь.";
                 if (token != null)
                 {
-                    var model = new CodeModel(code, status);
+                    var model = new CodeModel(clean, status);
                     var answer = await codeSenderService.SendCodeAsync(token, model);
                     message = answer.message ?? "Нет ответа";
                 }
